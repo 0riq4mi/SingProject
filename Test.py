@@ -18,7 +18,7 @@ print("""================================
     
     6- Prodüksiyonun Şarkıları
       
-    7- Toplam Süre  
+    7- Süre Listele  
        
 ================================""")
 
@@ -52,7 +52,7 @@ while True:
     elif islem == "4":
         isim = input("Hangi Şarkıyı silmek istiyorsunuz ? :")
         cevap = input("Emin misiniz ? (E/H)")
-        if cevap == "E":
+        if cevap == "E" or cevap == "e":
             time.sleep(2)
             sarkilar.sarki_sil(isim)
     elif islem == "5":
@@ -68,16 +68,8 @@ while True:
     elif islem == "7":
         print("Toplam Süre Hesaplanıyor...")
         time.sleep(2)
-        sarkilar.toplam_sure()
+        sarkilar.sarki_listele()
+    elif islem == "8":
+        sarkilar.hata_bul()
     else:
         print("Hatalı Giriş!!!")
-
-
-
-
-
-
-
-
-
-

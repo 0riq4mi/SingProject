@@ -1,5 +1,8 @@
 import sqlite3
 import time
+from datetime import datetime
+from datetime import datetime, timedelta
+
 
 
 class Sarki():
@@ -43,8 +46,10 @@ class Sarkilar():
             print("Şarkı Listesi Boş...")
         else:
             for i in sarkilar:
+                print("--------------------------------------")
                 sarki = Sarki(i[0],i[1],i[2],i[3],i[4])
                 print(sarki)
+                print("--------------------------------------")
     
     def sarki_bul(self,isim):
         sorgu = "SELECT * FROM sarki_listesi WHERE isim = ?"
@@ -58,30 +63,20 @@ class Sarkilar():
     
     def sarki_ekle(self,sarki):
         sorgu = "INSERT INTO sarki_listesi VALUES (?,?,?,?,?)"
-        self.cursor.execute(sorgu,(sarki.isim,sarki.sanatci,sarki.albüm,sarki.prodüksiyon,sarki.süresi))
+        self.cursor.execute(sorgu,(sarki.isim,sarki.sanatci,sarki.albüm,sarki.prodüksiyon,sarki.süresi,))
         self.baglanti.commit()
         
     def sarki_sil(self, isim):
-        sorgu = "SELECT * FROM sarki_listesi WHERE isim LIKE ?"
-        self.cursor.execute(sorgu, ('%' + isim + '%',))
+        sorgu = "SELECT * FROM sarki_listesi WHERE isim = ?"
+        self.cursor.execute(sorgu, (isim,))
         sarkilar = self.cursor.fetchall()
-        
         if len(sarkilar) == 0:
-            print(f"{isim} isimli şarkı bulunamadı.")
-        elif len(sarkilar) == 1:
-            sorgu = "DELETE FROM sarki_listesi WHERE isim = ?"
-            self.cursor.execute(sorgu, (sarkilar[0][0],))
-            self.baglanti.commit()
-            print(f"{isim} isimli şarkı başarıyla silindi.")
+            print("Böyle bir şarkı bulunamadı.")
         else:
-            print("Aşağıdaki şarkılar bulundu:")
-            for sarki in sarkilar:
-                print(sarki[0])
-            secim = input("Hangi şarkıyı silmek istersiniz? ")
             sorgu = "DELETE FROM sarki_listesi WHERE isim = ?"
-            self.cursor.execute(sorgu, (secim,))
+            self.cursor.execute(sorgu, (isim,))
             self.baglanti.commit()
-            print(f"{secim} isimli şarkı başarıyla silindi.")
+            print("{} isimli şarkı başarıyla silindi.".format(isim))
 
     def toplam_sure(self):
         sorgu = "SELECT SUM(strftime('%s', süresi)) FROM sarki_listesi"
@@ -119,12 +114,47 @@ class Sarkilar():
         else:
             for i in liste:
                 print(i)
-        
-        
-        
-        
-        
-        
-        
-        
-        
+    def sarki_listele(self):
+        sorgu = "SELECT * FROM sarki_listesi"
+        self.cursor.execute(sorgu)
+        sarkilar = self.cursor.fetchall()
+
+        print("Şarkılar Listesi:")
+        print("{:<25} {:<20} {:<35} {:<35} {:<10}".format("Şarkı Adı", "Sanatçı", "Albüm", "Prodüksiyon", "Süre"))
+        print("{:-<25} {:-<20} {:-<35} {:-<35} {:-<10}".format("", "", "", "", ""))
+
+        toplam_sure = timedelta()
+
+        for sarki in sarkilar:
+            sarki_adi = sarki[0]
+            sanatci = sarki[1]
+            albüm = sarki[2]
+            prodüksiyon = sarki[3]
+            sarki_suresi = timedelta(minutes=int(sarki[4].split(':')[0]), seconds=int(sarki[4].split(':')[1]))
+
+            print("{:<25} {:<20} {:<35} {:<35} {:<10}".format(sarki_adi, sanatci, albüm, prodüksiyon, str(sarki_suresi)))
+
+            toplam_sure += sarki_suresi
+
+        print("{:*<25} {:*<20} {:*<35} {:*<35} {:*<10}".format("", "", "", "", ""))
+        print("{:<25} {:<20} {:<35} {:<35} {:<10}".format("Toplam süre:", "", "", "", str(toplam_sure)))
+
+
+
+
+    def hata_bul(self):
+        for sarki in self.cursor.execute("SELECT * FROM sarki_listesi"):
+            print(type(sarki[0]))
+            print(type(sarki[1]))
+            print(type(sarki[2]))
+            print(type(sarki[3]))
+            print(type(sarki[4]))
+            try:
+                datetime.strptime(sarki[4], '%M:%S').strftime('%-M:%S')
+            except ValueError:
+                print(f"Invalid format for sarki_suresi in song '{sarki[1]}'")
+       
+    
+    
+    
+    
